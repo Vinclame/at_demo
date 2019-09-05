@@ -1,0 +1,57 @@
+1. Login op de Console en ga naar IAM en maak daar een user aan (jouwnaam_cli)
+
+2. Maak een group aan in IAM met de Full permissies op EC2 en Cloudformation.
+
+3. Voeg de user aan de betreffende group toe.
+
+4. installeer de aws cli 
+
+$ curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip" 
+$ unzip awscli-bundle.zip 
+$ ./awscli-bundle/install -b ~/bin/aws
+
+5. Ga terug naar IAM en genereer een access ID/Key(access type: programmatic access) voor de user.
+     * Laat het scherm even openstaan of download het csv bestand.
+
+6. Configureer de juiste credentials op de CLI
+ 
+$ aws configure
+
+	**Kies region us-east-1 of us-east-2 (alleen voor deze regions is mapping gemaakt in de template)
+
+7. Genereer een key pair in de console: EC2 → Network&Security → Key Pairs
+
+8. cloudformation template binnenhalen
+
+$ git clone git@github.com:Vinclame/at_demo.git
+
+9. deploy cloudformation tempate ec2_demo.yml
+
+$   aws cloudformation create-stack --template-body file://ec2_demo.yml --stack-name vincent_stack --parameters ParameterKey=KeyName,ParameterValue=AT_demo ParameterKey=InstanceName,ParameterValue=vincent
+
+10. Controleer in de console de stack status (events etc)
+
+11. Op de CLI
+
+$ aws cloudformation describe-stacks --stack-name vincent_stack
+
+12. Zoek de instance er bij. Letop, als er meerdere instances zijn gemaakt binnen dezelfde region dan zie je die allemaal. Filter dan even op de instance naam (de Tag die je aan jouw instance hebt gegeven)
+
+$ aws ec2 describe-instances --filters Name=tag:Name,Values=vincent –output table
+  
+  ** Zoek hier het public ip address erbij.
+
+13. Inloggen op de instance
+
+$ ssh -i .ssh/keyname.pem ec2-user@<ipadres>
+
+14. Stack incl resources verwijderen:
+
+$ aws cloudformation delete-stack --stack-name vincent_stack
+
+Extra
+
+Mocht je de template willen aanpassen dan kun je naderhand een validatie doen:
+
+$ aws cloudformation validate-template --template-body file://ec2_demo.yml
+
